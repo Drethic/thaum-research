@@ -1,0 +1,39 @@
+<%= form_for(@aspect) do |f| %>
+  <% if @aspect.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@aspect.errors.count, "error") %> prohibited this aspect from being saved:</h2>
+
+      <ul>
+      <% @aspect.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <table>
+    <tr>
+      <td><%= f.label :aspect, "Aspect Name: " %></td>
+      <td><%= f.text_field :aspect %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :keywords, "Keywords: " %></td>
+      <td><%= f.text_field :keywords %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :component1, "Component 1: " %></td>
+      <td><%= f.text_field :component1 %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :component2, "Component 2: " %></td>
+      <td><%= f.text_field :component2 %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :sources, "Sources: " %></td>
+      <td><%= f.text_field :sources %></td>
+    </tr>
+  </table>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

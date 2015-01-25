@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+<table>
+    <tr>
+        <td>Aspect Name:</td>
+        <td><%= @aspect.aspect %></td>
+    </tr>
+    <tr>
+        <td>Keywords:</td>
+        <td><%= @aspect.keywords %></td>
+    </tr>
+    <tr>
+        <td>Component 1:</td>
+        <td><%= @aspect.component1 %></td>
+    </tr>
+    <tr>
+        <td>Component 2:</td>
+        <td><%= @aspect.component2 %></td>
+    </tr>
+    <tr>
+        <td>Sources:</td>
+        <td><%= @aspect.sources %></td>
+    </tr>
+</table>
+<%= link_to 'Edit', edit_aspect_path(@aspect) %> |
+<%= link_to 'Back', aspects_path %>

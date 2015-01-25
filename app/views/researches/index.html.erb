@@ -1,0 +1,25 @@
+<h1>Research</h1>
+<p id="notice"><%= notice %></p>
+<table>
+  <thead>
+    <tr>
+      <th>Starting Aspect</th>
+      <th>Ending Aspect</th>
+      <th>Minimum Distance</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+  <%= form_for(:index) do |f| %>
+  <tr>
+    <td><%= f.select :aspect_from, Aspect.all.collect { |a| [a.aspect, a.id] } %></td>
+    <td><%= f.select :aspect_to, Aspect.all.collect { |a| [a.aspect, a.id] } %></td>
+    <td><%= f.select :min_distance, (1...11).step(1).to_a.map { |i| [i, i] } %></td>
+  </tr>
+  <tr colspan="2">
+    <td><%= f.submit %></td>
+  </tr>
+  <% end %>
+  </tbody>
+</table>
