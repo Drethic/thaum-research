@@ -18,7 +18,7 @@
     <td><%= f.select :min_distance, (1...11).step(1).to_a.map { |i| [i, i] } %></td>
   </tr>
   <tr colspan="2">
-    <td><%= f.submit %></td>
+    <td><%= f.submit "Search" %></td>
   </tr>
   <% end %>
   </tbody>

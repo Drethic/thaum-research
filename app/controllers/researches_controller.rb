@@ -7,38 +7,73 @@ class ResearchesController < ApplicationController
 
   def create
     @neo = Neography::Rest.new
-    @neo.inspect
-    respond_to do |format|
-      format.html { redirect_to root_url, notice: "From: #{@neo.create_relationship("test", "a", "b")}" }
+    node_check = @neo.execute_query("START a = node(*) RETURN ID(a), a.name;")["data"].collect{|n| {"id" => n[0], "name" => n[1]} }
+    if node_check.empty?
+      create_person
+      add_aspect_map
     end
-    # aspect_from = Aspect.find(research_params[:aspect_from])
-    # aspect_to = Aspect.find(research_params[:aspect_to])
-    # create_person
-    # degrees_of_separation(aspect_to.aspect, aspect_from.aspect).each do |path|
-    #   puts "#{(path["names"].size - 1 )} Path: " + path["names"].join(' => ')
-    # end
+    #mapid = @neo.execute_query("START n = node(*) MATCH (n) WHERE n.name = 'Tenebrae' RETURN ID(n);")["data"]
+    #map = @neo.get_node(mapid)
+    # add_aspect_map
+    aspect_from_object = Aspect.find(research_params[:aspect_from])
+    aspect_to_object = Aspect.find(research_params[:aspect_to])
+    aspect_from = get_node(aspect_from_object.aspect)
+    aspect_to = get_node(aspect_to_object.aspect)
+    min_distance = (research_params[:min_distance].to_i + 1)
+    #route =degrees_of_separation(aspect_from.first, aspect_to.first, research_params[:min_distance].to_i)
+    route = []
+    degrees_of_separation(aspect_to.first, aspect_from.first, min_distance).each do |path|
+      if path["names"].size > min_distance
+        route << "Distance: #{(path["names"].size - 2 )} Path: #{path["names"].join(' => ')}"
+      end
+    end
+    respond_to do |format|
+      flash[:notice] = route.join("<br />").html_safe
+      format.html { redirect_to root_url }
+    end
   end
   def create_person
     aspects = Aspect.all
     aspects.each { |aspect|
       @neo.create_node("name" => aspect.aspect)
-      make_mutual_friends(aspect.component1, aspect.component2)
     }
   end
-  
-  def make_mutual_friends(node1, node2)
-    @neo.create_relationship("aspect", node1, node2)
-    @neo.create_relationship("aspect", node2, node1)
+
+  def add_aspect_map
+    aspects = Aspect.all
+    aspects.each { |aspect|
+      if !aspect.component2.empty?
+        aspect_aspect = get_node(aspect.aspect)
+        aspect_component1 = get_node(aspect.component1)
+        aspect_component2 = get_node(aspect.component2)
+        @neo.create_relationship("aspect", @neo.get_node(aspect_aspect.first), @neo.get_node(aspect_component1.first))
+        @neo.create_relationship("aspect", @neo.get_node(aspect_component1.first), @neo.get_node(aspect_aspect.first))
+        @neo.create_relationship("aspect", @neo.get_node(aspect_aspect.first), @neo.get_node(aspect_component2.first))
+        @neo.create_relationship("aspect", @neo.get_node(aspect_component2.first), @neo.get_node(aspect_aspect.first))
+      end
+    }
   end
-  
-  def degrees_of_separation(start_node, destination_node)
-    paths =  @neo.get_paths(start_node, 
-                            destination_node, 
-                            {"type"=> "aspect", "direction" => "in"},
-                            depth=4, 
-                            algorithm="shortestPath")
+
+  def get_node(aspect)
+    @neo.execute_query("START n = node(*) MATCH (n) WHERE n.name = '#{aspect}' RETURN ID(n);")["data"]
+  end
+
+  def degrees_of_separation(start_node, destination_node, depth)
+    # paths =  @neo.get_paths(start_node,
+    #                         destination_node,
+    #                         {"type"=> "aspect", "direction" => "in"},
+    #                         depth=7,
+    #                         algorithm="allPaths")
+    paths = @neo.get_paths(start_node,
+      destination_node,
+      {"type"=> "aspect", "direction" => "in"},
+      depth=depth,
+      algorithm="allPaths"
+    )
+    #paths = @neo.get_paths(start_node, destination_node, {"type" => "aspect"})
+    #paths = @neo.get_node_relationships(start_node)
     paths.each do |p|
-     p["names"] = p["nodes"].collect { |node| 
+    p["names"] = p["nodes"].collect { |node|
        @neo.get_node_properties(node, "name")["name"] }
     end
   end

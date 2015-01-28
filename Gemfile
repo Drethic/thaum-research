@@ -27,6 +27,8 @@ gem 'sdoc', '~> 0.4.0',          group: :doc
 gem 'spring',        group: :development
 
 gem 'neography'
+gem 'seed_dump'
+gem 'activerecord-session_store', github: 'rails/activerecord-session_store'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
